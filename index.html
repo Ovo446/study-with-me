@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>study with me</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#010a03;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui,sans-serif}
+.app{position:relative;width:560px;min-height:600px;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2rem 1.5rem 1.5rem;gap:1.2rem}
+.bg{position:absolute;inset:0;z-index:0}
+.overlay{position:absolute;inset:0;background:rgba(2,12,4,0.55);z-index:1}
+.rain-canvas{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 1s}
+.rain-canvas.show{opacity:1}
+.content{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:1.2rem;width:100%}
+.cat-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none}
+#catCanvas{image-rendering:pixelated;width:112px;height:112px}
+.zzz{font-size:12px;color:#a0d490;letter-spacing:3px;transition:opacity 0.4s}
+.cat-msg{font-size:12px;color:#b8e0a0;letter-spacing:0.5px;min-height:16px;text-align:center}
+.rain-btn{background:rgba(10,30,12,0.7);border:1px solid #2d5a20;color:#90c870;padding:7px 22px;border-radius:20px;cursor:pointer;font-size:12px;letter-spacing:1px;transition:all 0.2s}
+.rain-btn:hover{background:rgba(20,50,18,0.8);border-color:#4a8a35}
+.rain-btn.on{border-color:#6ab840;color:#b0e890}
+.timers{display:flex;gap:10px;width:100%}
+.tc{flex:1;background:rgba(8,22,10,0.75);border:1px solid #1e3a18;border-radius:10px;padding:12px 14px;text-align:center;transition:border-color 0.3s}
+.tc.running{border-color:#3a7a28}
+.tc-title{font-size:10px;color:#5a8a48;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;cursor:text;outline:none;display:inline-block}
+.tc-title:focus{color:#a0d480;border-bottom:1px solid #3a6a28}
+.tc-time{font-size:20px;font-weight:500;color:#c0e8a0;letter-spacing:2px;font-variant-numeric:tabular-nums;margin-bottom:8px}
+.tc-btns{display:flex;gap:5px;justify-content:center}
+.tc-btns button{background:rgba(15,35,12,0.8);border:1px solid #1e3a18;color:#7aaa60;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;transition:background 0.15s}
+.tc-btns button:hover{background:rgba(25,55,20,0.9)}
+.hint{font-size:10px;color:#2d4a28;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="app">
+  <svg class="bg" viewBox="0 0 560 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <rect width="560" height="600" fill="#020c04"/>
+    <rect width="560" height="280" fill="#04130a"/>
+    <rect y="280" width="560" height="320" fill="#010a03"/>
+    <ellipse cx="100" cy="80" rx="90" ry="60" fill="#061508"/>
+    <ellipse cx="280" cy="60" rx="120" ry="70" fill="#07180a"/>
+    <ellipse cx="430" cy="90" rx="100" ry="65" fill="#061508"/>
+    <ellipse cx="520" cy="70" rx="80" ry="55" fill="#07180a"/>
+    <polygon points="20,600 60,320 100,600" fill="#030e05"/>
+    <polygon points="40,600 80,290 120,600" fill="#04120a"/>
+    <polygon points="100,600 135,310 170,600" fill="#061508"/>
+    <polygon points="130,600 160,280 190,600" fill="#04120a"/>
+    <polygon points="200,600 230,340 260,600" fill="#071a0b"/>
+    <polygon points="220,600 255,300 290,600" fill="#051008"/>
+    <polygon points="290,600 320,320 350,600" fill="#04120a"/>
+    <polygon points="310,600 345,295 380,600" fill="#071a0b"/>
+    <polygon points="370,600 405,310 440,600" fill="#051008"/>
+    <polygon points="400,600 435,285 470,600" fill="#04120a"/>
+    <polygon points="460,600 495,300 530,600" fill="#071a0b"/>
+    <polygon points="490,600 525,280 560,600" fill="#051008"/>
+    <circle cx="180" cy="45" r="3" fill="#d4e8c0" opacity="0.6"/>
+    <circle cx="300" cy="30" r="2" fill="#c8e0b8" opacity="0.5"/>
+    <circle cx="420" cy="50" r="2.5" fill="#d0e8bc" opacity="0.55"/>
+    <ellipse cx="280" cy="310" rx="180" ry="18" fill="#081a0a" opacity="0.8"/>
+    <rect y="540" width="560" height="60" fill="#020804"/>
+  </svg>
+  <div class="overlay"></div>
+  <canvas class="rain-canvas" id="rc"></canvas>
+
+  <div class="content">
+    <div style="font-size:11px;color:#3a5a30;letter-spacing:3px">— deep forest —</div>
+
+    <div class="cat-wrap" id="catWrap" onclick="petCat()">
+      <canvas id="catCanvas" width="14" height="14"></canvas>
+      <div class="zzz" id="zzz">z z z</div>
+      <div class="cat-msg" id="catMsg">napping peacefully ~ click to wake</div>
+    </div>
+
+    <button class="rain-btn" id="rainBtn" onclick="toggleRain()">
+      <i class="ti ti-cloud-rain"></i> let it rain
+    </button>
+
+    <div class="timers">
+      <div class="tc" id="tc1">
+        <div contenteditable="true" class="tc-title" id="title1">Claude / AI</div>
+        <div class="tc-time" id="time1">00:00:00</div>
+        <div class="tc-btns">
+          <button onclick="startT(1)"><i class="ti ti-player-play"></i></button>
+          <button onclick="pauseT(1)"><i class="ti ti-player-pause"></i></button>
+          <button onclick="resetT(1)">rst</button>
+        </div>
+      </div>
+      <div class="tc" id="tc2">
+        <div contenteditable="true" class="tc-title" id="title2">Khan Academy</div>
+        <div class="tc-time" id="time2">00:00:00</div>
+        <div class="tc-btns">
+          <button onclick="startT(2)"><i class="ti ti-player-play"></i></button>
+          <button onclick="pauseT(2)"><i class="ti ti-player-pause"></i></button>
+          <button onclick="resetT(2)">rst</button>
+        </div>
+      </div>
+    </div>
+    <div class="hint">click the label to rename timers</div>
+  </div>
+</div>
+
+<script>
+const cc=document.getElementById('catCanvas');
+const cx=cc.getContext('2d');
+const C={body:'#c8a47a',lite:'#e0c89a',dark:'#7a5030',ear:'#b08050',earIn:'#e09080',eye:'#3a2010',nose:'#d06858',belly:'#ead0a8',stripe:'#a07848',tail:'#b89060'};
+function px(x,y,c){cx.fillStyle=c;cx.fillRect(x,y,1,1);}
+function drawSleep(){
+  cx.clearRect(0,0,14,14);
+  [[5,2,C.ear],[6,2,C.ear],[8,2,C.ear],[9,2,C.ear],[5,1,C.dark],[9,1,C.dark],[6,2,C.earIn],[8,2,C.earIn],
+   [4,3,C.body],[5,3,C.body],[6,3,C.body],[7,3,C.body],[8,3,C.body],[9,3,C.body],[10,3,C.body],
+   [3,4,C.body],[4,4,C.belly],[5,4,C.belly],[6,4,C.belly],[7,4,C.belly],[8,4,C.belly],[9,4,C.belly],[10,4,C.belly],[11,4,C.body],
+   [3,5,C.body],[4,5,C.belly],[5,5,C.belly],[6,5,C.belly],[7,5,C.belly],[8,5,C.belly],[9,5,C.belly],[10,5,C.belly],[11,5,C.body],
+   [3,6,C.body],[4,6,C.body],[5,6,C.body],[6,6,C.body],[7,6,C.body],[8,6,C.body],[9,6,C.body],[10,6,C.body],[11,6,C.body],
+   [5,4,C.eye],[6,4,C.eye],[8,4,C.eye],[9,4,C.eye],[7,5,C.nose],
+   [4,7,C.dark],[5,7,C.body],[9,7,C.body],[10,7,C.dark],
+   [5,8,C.tail],[6,8,C.tail],[7,8,C.tail],[8,8,C.tail],[9,8,C.tail],[10,8,C.tail],[11,8,C.tail],[12,8,C.tail],[12,7,C.tail],[13,7,C.tail],[13,6,C.tail]
+  ].forEach(([x,y,c])=>px(x,y,c));
+}
+function drawAwake(){
+  cx.clearRect(0,0,14,14);
+  [[5,2,C.ear],[6,2,C.ear],[8,2,C.ear],[9,2,C.ear],[5,1,C.dark],[9,1,C.dark],[6,2,C.earIn],[8,2,C.earIn],
+   [4,3,C.body],[5,3,C.body],[6,3,C.body],[7,3,C.body],[8,3,C.body],[9,3,C.body],[10,3,C.body],
+   [3,4,C.body],[4,4,C.belly],[5,4,C.belly],[6,4,C.belly],[7,4,C.belly],[8,4,C.belly],[9,4,C.belly],[10,4,C.belly],[11,4,C.body],
+   [3,5,C.body],[4,5,C.belly],[5,5,C.belly],[6,5,C.belly],[7,5,C.belly],[8,5,C.belly],[9,5,C.belly],[10,5,C.belly],[11,5,C.body],
+   [3,6,C.body],[4,6,C.body],[5,6,C.body],[6,6,C.body],[7,6,C.body],[8,6,C.body],[9,6,C.body],[10,6,C.body],[11,6,C.body],
+   [5,4,C.dark],[9,4,C.dark],[6,4,C.eye],[8,4,C.eye],[7,5,C.nose],
+   [4,7,C.dark],[5,7,C.body],[9,7,C.body],[10,7,C.dark],
+   [3,8,C.tail],[4,8,C.tail],[13,8,C.tail],[12,8,C.tail],[2,7,C.tail],[2,6,C.tail],[13,7,C.tail],[13,6,C.tail]
+  ].forEach(([x,y,c])=>px(x,y,c));
+}
+let breathPhase=0,awake=false,wakeTimer=null;
+const msgs_sleep=['napping peacefully ~ click to wake','zzz... rooting for you','dreaming of your SAT score...','quietly cheering for you ~'];
+const msgs_awake=['meow!! you woke me up!!','study hard!! i believe in you ~','you got this!! meow','go go go!! meow meow'];
+let msgI=0;
+function animCat(){
+  breathPhase=(breathPhase+1)%60;
+  if(!awake){
+    drawSleep();
+    cc.style.transform=`scaleY(${1+0.015*Math.sin(breathPhase/30*Math.PI)})`;
+  } else {
+    drawAwake();
+    cc.style.transform='scale(1)';
+  }
+  requestAnimationFrame(animCat);
+}
+function petCat(){
+  awake=true;
+  cc.style.transform='scale(1.08)';
+  setTimeout(()=>cc.style.transform='scale(1)',200);
+  document.getElementById('zzz').style.opacity='0';
+  document.getElementById('catMsg').textContent=msgs_awake[Math.floor(Math.random()*msgs_awake.length)];
+  clearTimeout(wakeTimer);
+  wakeTimer=setTimeout(()=>{
+    awake=false;
+    document.getElementById('zzz').style.opacity='1';
+    document.getElementById('catMsg').textContent=msgs_sleep[Math.floor(Math.random()*msgs_sleep.length)];
+  },4000);
+}
+setInterval(()=>{if(!awake){msgI=(msgI+1)%msgs_sleep.length;document.getElementById('catMsg').textContent=msgs_sleep[msgI];}},7000);
+animCat();
+
+let secs=[0,0],ivs=[null,null],run=[false,false];
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60);}
+function startT(n){
+  if(run[n-1])return;
+  run[n-1]=true;
+  document.getElementById('tc'+n).classList.add('running');
+  ivs[n-1]=setInterval(()=>{
+    secs[n-1]++;
+    document.getElementById('time'+n).textContent=fmt(secs[n-1]);
+    if(secs[n-1]%300===0){petCat();document.getElementById('catMsg').textContent=Math.round(secs[n-1]/60)+' mins in! meow, keep going ~';}
+  },1000);
+}
+function pauseT(n){if(!run[n-1])return;run[n-1]=false;clearInterval(ivs[n-1]);document.getElementById('tc'+n).classList.remove('running');}
+function resetT(n){pauseT(n);secs[n-1]=0;document.getElementById('time'+n).textContent='00:00:00';}
+
+let rainOn=false,rainRaf=null,actx=null,rsrc=null;
+const rc=document.getElementById('rc');
+const rctx=rc.getContext('2d');
+let drops=[];
+function initRain(){
+  rc.width=rc.parentElement.offsetWidth;rc.height=rc.parentElement.offsetHeight;
+  drops=Array.from({length:100},()=>({x:Math.random()*rc.width,y:Math.random()*rc.height,s:4+Math.random()*5,l:7+Math.random()*12,a:0.15+Math.random()*0.25}));
+}
+function animRain(){
+  if(!rainOn)return;
+  rctx.clearRect(0,0,rc.width,rc.height);
+  drops.forEach(d=>{
+    rctx.beginPath();rctx.moveTo(d.x,d.y);rctx.lineTo(d.x-0.6,d.y+d.l);
+    rctx.strokeStyle=`rgba(160,220,140,${d.a})`;rctx.lineWidth=0.6;rctx.stroke();
+    d.y+=d.s;if(d.y>rc.height){d.y=-15;d.x=Math.random()*rc.width;}
+  });
+  rainRaf=requestAnimationFrame(animRain);
+}
+function startSound(){
+  try{
+    actx=new(window.AudioContext||window.webkitAudioContext)();
+    const sr=actx.sampleRate,buf=actx.createBuffer(1,sr*2,sr),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+    rsrc=actx.createBufferSource();rsrc.buffer=buf;rsrc.loop=true;
+    const f=actx.createBiquadFilter();f.type='bandpass';f.frequency.value=700;f.Q.value=0.4;
+    const f2=actx.createBiquadFilter();f2.type='lowpass';f2.frequency.value=2000;
+    const g=actx.createGain();g.gain.value=0.07;
+    rsrc.connect(f);f.connect(f2);f2.connect(g);g.connect(actx.destination);
+    rsrc.start();
+  }catch(e){}
+}
+function stopSound(){try{rsrc&&rsrc.stop();actx&&actx.close();}catch(e){}}
+function toggleRain(){
+  rainOn=!rainOn;
+  const btn=document.getElementById('rainBtn');
+  btn.classList.toggle('on',rainOn);
+  btn.innerHTML=rainOn?'<i class="ti ti-cloud-rain"></i> rain is falling...':'<i class="ti ti-cloud-rain"></i> let it rain';
+  document.getElementById('rc').classList.toggle('show',rainOn);
+  if(rainOn){initRain();animRain();startSound();}
+  else{cancelAnimationFrame(rainRaf);rctx.clearRect(0,0,rc.width,rc.height);stopSound();}
+}
+</script>
+</body>
+</html>
